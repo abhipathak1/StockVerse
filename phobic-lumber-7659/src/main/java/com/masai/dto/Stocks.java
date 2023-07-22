@@ -73,4 +73,8 @@ public class Stocks {
 	// One-to-Many relationship with UserPortfolio
 	@OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<UserPortfolio> userPortfolioList;
+
+	
+	
+	
 }

@@ -1,23 +1,26 @@
 package com.masai.ui;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import com.masai.Dao.UserDAO;
+import com.masai.Dao.UserDAOImpl;
+import com.masai.Dao.UserPortfolioDAO;
+import com.masai.Dao.UserPortfolioDAOImpl;
 import com.masai.Service.UserService;
 import com.masai.dto.Stocks;
 import com.masai.dto.User;
+import com.masai.dto.UserPortfolio;
 
 public class MainUi {
 
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
-		UserDAO userDAO = new UserDAO();
-		UserService userService = new UserService(userDAO);
-
-//		StocksDao stocksDao = new StocksDao();
-//		StockService stockService = new StockService(stocksDao);
-
+		UserDAO userDAO = new UserDAOImpl();
+		UserPortfolioDAO userPortfolioDAO = new UserPortfolioDAOImpl();
+		UserService userService = new UserService(userDAO, userPortfolioDAO);
 		int choice = 0;
 
 		do {
@@ -31,7 +34,7 @@ public class MainUi {
 
 			switch (choice) {
 			case 1:
-				adminLogin(userService); 
+				adminLogin(userService);
 				break;
 			case 2:
 				userLogin(userService);
@@ -60,7 +63,9 @@ public class MainUi {
 		String password = scanner.nextLine();
 
 		if (username.equals(adminUsername) && password.equals(adminPassword)) {
-			showAdminOptions(userService); 
+			System.out.println();
+			System.out.println("Admin successfully Logged in.");
+			showAdminOptions(userService);
 		} else {
 			System.out.println("Invalid credentials. Access denied.");
 		}
@@ -75,8 +80,9 @@ public class MainUi {
 			System.out.println("2. Edit Stocks");
 			System.out.println("3. View Stocks");
 			System.out.println("4. Delete Stocks");
-			System.out.println("5. Delete Users From Server");
-			System.out.println("6. Logout");
+			System.out.println("5. View All Users");
+			System.out.println("6. Delete Users From Server");
+			System.out.println("7. Logout");
 			System.out.print("Enter your choice: ");
 			choice = scanner.nextInt();
 
@@ -94,15 +100,18 @@ public class MainUi {
 				deleteStock(userService);
 				break;
 			case 5:
-				deleteUsers(userService);
+				viewAllUsers(userService);
 				break;
 			case 6:
+				deleteUsers(userService);
+				break;
+			case 7:
 				System.out.println("Admin logged out.");
 				break;
 			default:
 				System.out.println("Invalid choice. Please try again.");
 			}
-		} while (choice != 4);
+		} while (choice != 7);
 	}
 
 	private static void addStock(UserService userService) {
@@ -198,6 +207,21 @@ public class MainUi {
 		}
 	}
 
+	private static void viewAllUsers(UserService userService) {
+		List<User> users = userService.viewAllUsers();
+		if (users.isEmpty()) {
+			System.out.println("No users found on the server.");
+		} else {
+			System.out.println("\n---- All Users ----");
+			for (User user : users) {
+				System.out.println("Name: " + user.getName());
+				System.out.println("Username: " + user.getUsername());
+				System.out.println("Wallet Balance: " + user.getWalletBalance());
+				System.out.println("----------------------");
+			}
+		}
+	}
+
 	private static void deleteUsers(UserService userService) {
 		Scanner scanner = new Scanner(System.in);
 
@@ -226,9 +250,6 @@ public class MainUi {
 			System.out.println("User with username " + username + " not found.");
 		}
 	}
-
-//	---------------------Users--------------------------------
-//	---------------------Users--------------------------------
 
 	private static void userSignup(UserService userService) {
 		Scanner scanner = new Scanner(System.in);
@@ -265,44 +286,195 @@ public class MainUi {
 		User user = userService.getUserByUsername(username);
 
 		if (user != null && user.getPassword().equals(password)) {
-			showUserOptions(user);
+			showUserOptions(userService, user);
 		} else {
 			System.out.println("Invalid credentials. Access denied.");
 		}
 	}
 
-	private static void showUserOptions(User user) {
+	private static void showUserOptions(UserService userService, User user) {
 		Scanner scanner = new Scanner(System.in);
 		int choice;
 		do {
 			System.out.println("\n---- User Options ----");
 			System.out.println("1. View Portfolio");
-			System.out.println("2. Buy Stocks");
-			System.out.println("3. Logout");
+			System.out.println("2. View Available Stocks");
+			System.out.println("3. Buy Stocks");
+			System.out.println("4. Add More Balance to Wallet");
+			System.out.println("5. Change Password");
+			System.out.println("6. Logout");
 			System.out.print("Enter your choice: ");
 			choice = scanner.nextInt();
 
 			switch (choice) {
 			case 1:
-				viewPortfolio(user);
+				viewPortfolio(user, userService);
 				break;
 			case 2:
-				buyStocks(user);
+				viewAvailableStocks(userService);
 				break;
 			case 3:
+				buyStocks(user, userService);
+				break;
+			case 4:
+				addBalanceToWallet(user, userService);
+				break;
+			case 5:
+				changePassword(user, userService);
+				break;
+			case 6:
 				System.out.println("User logged out.");
 				break;
 			default:
 				System.out.println("Invalid choice. Please try again.");
 			}
-		} while (choice != 3);
+		} while (choice != 6);
 	}
 
-	private static void viewPortfolio(User user) {
-		// Implement logic to view user portfolio
+	private static void viewPortfolio(User user, UserService userService) {
+		List<UserPortfolio> userPortfolio = userService.getUserPortfolioByUser(user);
+		if (userPortfolio.isEmpty()) {
+			System.out.println("Your portfolio is empty. Buy stocks to add to your portfolio.");
+		} else {
+			System.out.println("\n---- User Portfolio ----");
+			for (UserPortfolio portfolio : userPortfolio) {
+				System.out.println("Stock Name: " + portfolio.getStock().getStockName());
+				System.out.println("Stock Price: " + portfolio.getStock().getStockPrice());
+				System.out.println("Quantity: " + portfolio.getQuantity());
+				System.out.println("-------------------------------------");
+			}
+		}
 	}
 
-	private static void buyStocks(User user) {
-		// Implement logic for user to buy stocks
+	private static void buyStocks(User user, UserService userService) {
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Enter stock name to buy: ");
+		String stockName = scanner.nextLine();
+
+		Stocks stockToBuy = userService.getStockByStockName(stockName);
+
+		if (stockToBuy != null) {
+			System.out.print("Enter quantity to buy: ");
+			int quantityToBuy = scanner.nextInt();
+
+			double totalPrice = stockToBuy.getStockPrice() * quantityToBuy;
+
+			if (user.getWalletBalance() >= totalPrice) {
+				user.setWalletBalance(user.getWalletBalance() - totalPrice);
+				userService.editUser(user);
+
+				UserPortfolio userPortfolio = new UserPortfolio();
+				userPortfolio.setUser(user);
+				userPortfolio.setStock(stockToBuy);
+				userPortfolio.setQuantity(quantityToBuy);
+
+				userService.addUserPortfolio(userPortfolio);
+				System.out.println("Stocks purchased successfully.");
+			} else {
+				System.out.println("Insufficient balance. Please add funds to your wallet.");
+			}
+		} else {
+			System.out.println("Stock with name " + stockName + " not found.");
+		}
 	}
+
+	private static void viewAvailableStocks(UserService userService) {
+		Scanner scanner = new Scanner(System.in);
+		int choice;
+		do {
+			System.out.println("\n---- Available Stocks ----");
+			System.out.println("1. View all available stocks");
+			System.out.println("2. View stocks sorted by price (low to high)");
+			System.out.println("3. View stocks sorted by price (high to low)");
+			System.out.println("4. Back to main menu");
+			System.out.print("Enter your choice: ");
+			choice = scanner.nextInt();
+
+			switch (choice) {
+			case 1:
+				viewStocks(userService);
+				break;
+			case 2:
+				viewStocksSortedByPriceLowToHigh(userService);
+				break;
+			case 3:
+				viewStocksSortedByPriceHighToLow(userService);
+				break;
+			case 4:
+				System.out.println("Returning to main menu.");
+				break;
+			default:
+				System.out.println("Invalid choice. Please try again.");
+			}
+		} while (choice != 4);
+	}
+
+	private static void viewStocksSortedByPriceLowToHigh(UserService userService) {
+		List<Stocks> stocksList = userService.getAllStocks();
+		if (stocksList.isEmpty()) {
+			System.out.println("No stocks available.");
+		} else {
+			List<Stocks> sortedStocks = stocksList.stream().sorted(Comparator.comparingDouble(Stocks::getStockPrice))
+					.collect(Collectors.toList());
+
+			System.out.println("\n---- Available Stocks (Low to High) ----");
+			for (Stocks stock : sortedStocks) {
+				System.out.println("Stock Name: " + stock.getStockName());
+				System.out.println("Stock Price: " + stock.getStockPrice());
+				System.out.println("----------------------");
+			}
+		}
+	}
+
+	private static void viewStocksSortedByPriceHighToLow(UserService userService) {
+		List<Stocks> stocksList = userService.getAllStocks();
+		if (stocksList.isEmpty()) {
+			System.out.println("No stocks available.");
+		} else {
+			List<Stocks> sortedStocks = stocksList.stream()
+					.sorted(Comparator.comparingDouble(Stocks::getStockPrice).reversed()).collect(Collectors.toList());
+
+			System.out.println("\n---- Available Stocks (High to Low) ----");
+			for (Stocks stock : sortedStocks) {
+				System.out.println("Stock Name: " + stock.getStockName());
+				System.out.println("Stock Price: " + stock.getStockPrice());
+				System.out.println("----------------------");
+			}
+		}
+	}
+
+	private static void addBalanceToWallet(User user, UserService userService) {
+	    Scanner scanner = new Scanner(System.in);
+	    System.out.println("Current Wallet Balance: $" + user.getWalletBalance());
+	    System.out.println();
+	    System.out.print("Enter the amount to add to your wallet: ");
+	    double amountToAdd = Double.parseDouble(scanner.nextLine());
+
+	    userService.addBalanceToWallet(user, amountToAdd);
+
+	    user = userService.getUserByUsername(user.getUsername());
+	    System.out.println("Amount successfully added to your wallet.");
+	    System.out.println("Updated Wallet Balance: $" + user.getWalletBalance());
+	}
+	
+	private static void changePassword(User user, UserService userService) {
+	    Scanner scanner = new Scanner(System.in);
+	    System.out.print("Enter your current password: ");
+	    String currentPassword = scanner.nextLine();
+
+
+	    if (user.getPassword().equals(currentPassword)) {
+	        System.out.print("Enter your new password: ");
+	        String newPassword = scanner.nextLine();
+
+
+	        userService.changePassword(user, newPassword);
+
+	        System.out.println("Password changed successfully. Please log in again.");
+	    } else {
+	        System.out.println("Incorrect current password. Password change failed.");
+	    }
+	}
+
+
 }
