@@ -98,4 +98,6 @@ public class User {
 	// One-to-Many relationship with UserPortfolio
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<UserPortfolio> userPortfolioList;
+
+	
 }
