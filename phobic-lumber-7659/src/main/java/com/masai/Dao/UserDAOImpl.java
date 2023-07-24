@@ -14,13 +14,13 @@ public class UserDAOImpl implements UserDAO {
 
 	@Override
 	public void addUser(User user) {
-		EntityManager entityManager = EMUtils.getEntityManager();
+		EntityManager em = EMUtils.getEntityManager();
 		EntityTransaction transaction = null;
 
 		try {
-			transaction = entityManager.getTransaction();
+			transaction = em.getTransaction();
 			transaction.begin();
-			entityManager.persist(user);
+			em.persist(user);
 			transaction.commit();
 		} catch (Exception e) {
 			if (transaction != null) {
@@ -28,22 +28,22 @@ public class UserDAOImpl implements UserDAO {
 			}
 			e.printStackTrace();
 		} finally {
-			entityManager.close();
+			em.close();
 		}
 	}
 
 	@Override
 	public User getUserByUsername(String username) {
-		EntityManager entityManager = EMUtils.getEntityManager();
+		EntityManager em = EMUtils.getEntityManager();
 
 		try {
 			String hql = "FROM User u WHERE u.username = :username";
-			return entityManager.createQuery(hql, User.class).setParameter("username", username).getSingleResult();
+			return em.createQuery(hql, User.class).setParameter("username", username).getSingleResult();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		} finally {
-			entityManager.close();
+			em.close();
 		}
 	}
 
@@ -214,26 +214,26 @@ public class UserDAOImpl implements UserDAO {
 			entityManager.close();
 		}
 	}
-	
-	 @Override
-	    public void changePassword(User user, String newPassword) {
-	        EntityManager entityManager = EMUtils.getEntityManager();
-	        EntityTransaction transaction = null;
 
-	        try {
-	            transaction = entityManager.getTransaction();
-	            transaction.begin();
-	            user.setPassword(newPassword);
-	            entityManager.merge(user);
-	            transaction.commit();
-	        } catch (Exception e) {
-	            if (transaction != null) {
-	                transaction.rollback();
-	            }
-	            e.printStackTrace();
-	        } finally {
-	            entityManager.close();
-	        }
-	    }
+	@Override
+	public void changePassword(User user, String newPassword) {
+		EntityManager entityManager = EMUtils.getEntityManager();
+		EntityTransaction transaction = null;
+
+		try {
+			transaction = entityManager.getTransaction();
+			transaction.begin();
+			user.setPassword(newPassword);
+			entityManager.merge(user);
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			entityManager.close();
+		}
+	}
 
 }
