@@ -10,6 +10,7 @@ import com.masai.Dao.UserDAOImpl;
 import com.masai.Dao.UserPortfolioDAO;
 import com.masai.Dao.UserPortfolioDAOImpl;
 import com.masai.Service.UserService;
+import com.masai.Service.UserServiceImpl;
 import com.masai.dto.Stocks;
 import com.masai.dto.User;
 import com.masai.dto.UserPortfolio;
@@ -34,7 +35,7 @@ public class MainUi {
 		Scanner scanner = new Scanner(System.in);
 		UserDAO userDAO = new UserDAOImpl();
 		UserPortfolioDAO userPortfolioDAO = new UserPortfolioDAOImpl();
-		UserService userService = new UserService(userDAO, userPortfolioDAO);
+		UserService userService = new UserServiceImpl(userDAO, userPortfolioDAO);
 		int choice = 0;
 
 		{

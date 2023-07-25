@@ -2,75 +2,37 @@ package com.masai.Service;
 
 import java.util.List;
 
-import com.masai.Dao.UserDAO;
-import com.masai.Dao.UserPortfolioDAO;
 import com.masai.dto.Stocks;
 import com.masai.dto.User;
 import com.masai.dto.UserPortfolio;
 
-public class UserService {
-	private UserDAO userDAO;
-	private UserPortfolioDAO userPortfolioDAO;
+public interface UserService {
 
-	public UserService(UserDAO userDAO, UserPortfolioDAO userPortfolioDAO) {
-		this.userDAO = userDAO;
-		this.userPortfolioDAO = userPortfolioDAO;
-	}
+    void addUser(User user);
 
-	public void addUser(User user) {
-		userDAO.addUser(user);
-	}
+    User getUserByUsername(String username);
 
-	public User getUserByUsername(String username) {
-		return userDAO.getUserByUsername(username);
-	}
+    void addStock(Stocks stock);
 
-	public void addStock(Stocks stock) {
-		userDAO.addStock(stock);
-	}
+    Stocks getStockByStockName(String stockName);
 
-	public Stocks getStockByStockName(String stockName) {
-		return userDAO.getStockByStockName(stockName);
-	}
+    void editStock(Stocks stock);
 
-	public void editStock(Stocks stock) {
-		userDAO.editStock(stock);
-	}
+    void deleteStock(Stocks stock);
 
-	public void deleteStock(Stocks stock) {
-		userDAO.deleteStock(stock);
-	}
+    List<Stocks> getAllStocks();
 
-	public List<Stocks> getAllStocks() {
-		return userDAO.getAllStocks();
-	}
+    void deleteUser(User user);
 
-	public void deleteUser(User user) {
-		userDAO.deleteUser(user);
-	}
+    List<UserPortfolio> getUserPortfolioByUser(User user);
 
-	public List<UserPortfolio> getUserPortfolioByUser(User user) {
-		return userPortfolioDAO.getUserPortfolioByUser(user);
-	}
+    void addUserPortfolio(UserPortfolio userPortfolio);
 
-	public void addUserPortfolio(UserPortfolio userPortfolio) {
-		userPortfolioDAO.addUserPortfolio(userPortfolio);
-	}
+    void editUser(User user);
 
-	public void editUser(User user) {
-		userDAO.editUser(user);
-	}
+    List<User> viewAllUsers();
 
-	public List<User> viewAllUsers() {
-		return userDAO.viewAllUsers();
-	}
-	
-	public void addBalanceToWallet(User user, double amountToAdd) {
-        userDAO.addBalanceToWallet(user, amountToAdd);
-    }
-	
-	 public void changePassword(User user, String newPassword) {
-	        userDAO.changePassword(user, newPassword);
-	    }
+    void addBalanceToWallet(User user, double amountToAdd);
 
+    void changePassword(User user, String newPassword);
 }
